@@ -6,7 +6,90 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(tidyverse)
+library(janitor)
+library(here)
+library(broom)
+library(ggpubr)
+library(lubridate)
+library(kableExtra)
 ```
 
+## Introduction
+
+ - In this document I will be exploring....
+ - A 4 - 5 sentence "mini-introduction" to what this study is exploring, including basic background information about the subject, site and study (with citations as needed), and a brief overview of what is included in the exploratory report. You should probably do this last.
+ 
+## Data & Analysis
+
+ - 3 - 4 sentence section in which you briefly describe the data, including citation & credit as needed, and provide an overview of the main analysis, statistical methods and tools used.
+ 
+```{r}
+bonanza_data <- read.csv(here("data", "bonanza_hares.csv")) %>% 
+  mutate(date = mdy(date))
+```
+
+ 
+## Making a subset of the data 
+
+- Looking at the annual juvenile hare trap counts during each year
+```{r}
+juv_annual <- bonanza_data %>%
+  mutate(year = year(date)) %>%
+  select(age, grid, year) %>% 
+  filter(age == "j") %>% 
+  group_by(year) %>% 
+  count(year) %>% 
+  rename("Total Juvenile Hares" = n, "Year" = year)
+
+juv_annual_summary <- bonanza_data %>%
+  mutate(year = year(date)) %>%
+  select(age, grid, year) %>% 
+  filter(age == "j") %>% 
+  group_by(age) %>% 
+  count(year) %>% 
+  summarize(mean = mean(n),
+            median = median(n))
+
+kbl(juv_annual) %>% 
+  kable_styling()
+
+kbl(juv_annual_summary) %>% 
+  kable_styling()
+```
+*ADD TABLE CAPTION*
+## Description
+3 - 4 sentences below your figure, describe major takeaways from your graph about total snowshoe hare trappings at the site. You might consider:
+
+What were the minimum and maximum counts of juvenile hare trappings?
+Mean or median annual number of juvenile hares trapped?
+General/notable trends?
+These are absolute counts, but this count is also impacted by effort (e.g. the number of days and number of traps in the study each year). What would you suggest be done moving forward (you are not expected to actually do this) to standardize the juvenile hare population in future analyses?
+
+
+## Part 2
+ggplot(data = purple_urchin_total, aes(x = year, y = n)) +
+  geom_col(aes(color = site_full)) +
+  
+ggplot(data = bonanza_j_weights, aes(x = weight)) +
+  geom_histogram(bins = 30) +
+  facet_wrap(~grid)
+```{r}
+bonanza_j_weights <- bonanza_data %>% 
+  select("sex", "weight", "grid") %>% 
+ # na.omit()
+  group_by(sex, grid)
+  
+  
+ggplot(data = bonanza_j_weights, aes(x = sex, y = weight)) +
+  geom_col(aes(color = grid)) +
+  facet_wrap(~grid)
+
+##
+#ggplot(data = purple_urchin_total, aes(x = year, y = n)) +
+  #geom_col(aes(color = sex, fill = sex)) 
+ 
+```
+
+ 
